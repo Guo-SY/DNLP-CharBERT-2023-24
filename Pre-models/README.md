@@ -14,9 +14,48 @@ We primarily provide two models. Here are the download links:
 pre-trained CharBERT based on BERT [charbert-bert-wiki](https://drive.google.com/file/d/1rF5_LbA2qIHuehnNepGmjz4Mu6OqEzYT/view?usp=sharing)    
 pre-trained CharBERT based on RoBERTa [charbert-roberta-wiki](https://drive.google.com/file/d/1tkO7_EH1Px7tXRxNDu6lzr_y8b4Q709f/view?usp=sharing)   
 
-In this link, The author have provided a pre-trained model based on wikipedia datasets. You can download the pre-trained models then use them as the: 
+1. In this link, the authors provide pre-trained models based on the Wikipedia dataset. You can download the pre-trained model and use it as your model:
 
 MODEL_DIR = YOUR_MODEL_PARH/Pre-models/charbert-bert-wiki
+
+2. There is other method for training your pre-trained model. Firstly, you could dolwnload the Wikipedia simple-datasets by the commond line:
+   
+from datasets import load_dataset
+datasets = load_dataset("wikipedia", "20220301.simple")
+
+Second, you can use this datasets to help you train pre-trained models.
+
+3. If you prefer to trained your pre-trained model, you could run the following code to help me train your pre-trained models.
+
+pip3 install -q datasets
+python3 /content/nlp_charbert/datasets/load_wiki_resized.py
+
+import nltk
+nltk.download('punkt')
+
+python3 ./CharBERT/run_lm_finetuning.py \
+    --model_type bert \
+    --model_name_or_path bert-base-cased \
+    --do_train \
+    --do_eval \
+    --train_data_file "./wikipedia_resized/wikil_eng_wiki_ita_train.txt" \
+    --eval_data_file  "./wikipedia_resized/wikil_eng_wiki_ita_val.txt" \
+    --term_vocab "/content/nlp_charbert/CharBERT/data/dict/term_vocab" \
+    --learning_rate 3e-5 \
+    --num_train_epochs 3 \
+    --char_vocab "/content/nlp_charbert/CharBERT/data/dict/bert_char_vocab" \
+    --mlm_probability 0.10 \
+    --input_nraws 1000 \
+    --per_gpu_train_batch_size 4 \
+    --per_gpu_eval_batch_size 4 \
+    --save_steps 10000 \
+    --block_size 3 \
+    --mlm \
+    --overwrite_output_dir \
+    --output_dir  "./output/wiki_eng"
+ 
+MODEL_DIR = "./output/wiki_eng"
+
 
 ## Directory Guide
 ```
@@ -97,19 +136,3 @@ python run_ner.py --data_dir ${DATA_DIR} \
                   --do_predict \
                   --overwrite_output_dir
 ```
-
-## Citation
-If you use the data or codes in this repository, please cite our paper.
-```
-@misc{ma2020charbert,
-      title={CharBERT: Character-aware Pre-trained Language Model}, 
-      author={Wentao Ma and Yiming Cui and Chenglei Si and Ting Liu and Shijin Wang and Guoping Hu},
-      year={2020},
-      eprint={2011.01513},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL}
-}
-```
-
-## Issues
-If there is any problem, please submit a GitHub Issue.
