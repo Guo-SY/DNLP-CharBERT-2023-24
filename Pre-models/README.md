@@ -49,14 +49,14 @@ python3 ./CharBERT/run_lm_finetuning.py \
     --per_gpu_train_batch_size 4 \
     --per_gpu_eval_batch_size 4 \
     --save_steps 10000 \
-    --block_size 3 \
+    --block_size 384  \
     --mlm \
     --overwrite_output_dir \
-    --output_dir  "./output/wiki_eng"
+    --output_dir  "./output/bert_base_cased_wiki_eng"
 
 ```
  
-MODEL_DIR = "./output/wiki_eng"
+MODEL_DIR = "./output/bert_base_cased_wiki_eng"
 
 
 ## Directory Guide
@@ -99,9 +99,10 @@ python3 run_lm_finetuning.py \
 
 ### SQuAD
 ```
-MODEL_DIR=YOUR_MODEL_PARH/charbert-bert-pretrain 
+MODEL_DIR= './output/bert_base_cased_wiki_eng'
 SQUAD2_DIR=YOUR_DATA_PATH/squad 
-OUTPUT_DIR=YOUR_OUTPUT_PATH/squad 
+OUTPUT_DIR=YOUR_OUTPUT_PATH/squad
+
 python run_squad.py \
     --model_type bert \
     --model_name_or_path ${MODEL_DIR} \
@@ -124,7 +125,7 @@ python run_squad.py \
 ### NER
 ```
 DATA_DIR=YOUR_DATA_PATH/CoNLL2003/NER-en
-MODEL_DIR=YOUR_MODEL_PATH/charbert-bert-wiki
+MODEL_DIR='./output/bert_base_cased_wiki_eng'
 OUTPUT_DIR=YOUR_OUTPUT_PATH/ner
 python run_ner.py --data_dir ${DATA_DIR} \
                   --model_type bert \
