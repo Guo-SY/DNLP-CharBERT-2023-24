@@ -26,7 +26,7 @@ datasets = load_dataset("wikipedia", "20220301.simple")
 Second, you can use this datasets to help you train pre-trained models.
 
 3. If you prefer to trained your pre-trained model, you could run the following code to help me train your pre-trained models.
-
+```
 pip3 install -q datasets
 python3 /content/nlp_charbert/datasets/load_wiki_resized.py
 
@@ -53,6 +53,8 @@ python3 ./CharBERT/run_lm_finetuning.py \
     --mlm \
     --overwrite_output_dir \
     --output_dir  "./output/wiki_eng"
+
+```
  
 MODEL_DIR = "./output/wiki_eng"
 
