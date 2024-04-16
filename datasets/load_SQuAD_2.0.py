@@ -2,13 +2,7 @@ import wget
 import os
 
 # Define the folder path where you want to download the files
-folder_path = "/content/datasets/SQuAD-2.0"
-
-# Create the folder if it doesn't exist
-os.makedirs(folder_path, exist_ok=True)
-
-# Change the working directory to the target folder
-os.chdir(folder_path)
+os.makedirs(os.path.dirname("./datasets/SQuAD_2.0/"), exist_ok=True)
 
 # Download the files directly into the folder
 train_file = wget.download("https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v2.0.json")
