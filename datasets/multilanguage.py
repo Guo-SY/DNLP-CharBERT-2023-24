@@ -5,55 +5,112 @@ import os
 
 DIV = 20
 
-def merge_and_shuffle(file_paths, output_file_path):
-    merged_content = []
-    for file_path in file_paths:
-        with open(file_path, 'r') as file:
-            merged_content.extend(file.readlines())
+def merge_and_shuffle(file1_path, file2_path, file3_path, output_file_path):
+    with open(file1_path, 'r') as file1, open(file2_path, 'r') as file2, open(file3_path, 'r') as file3:
+        content1 = file1.readlines()
+        content2 = file2.readlines()
+        content3 = file3.readlines()
+    merged_content = content1 + content2 + content3
     random.shuffle(merged_content)
+
     with open(output_file_path, 'w') as output_file:
         output_file.writelines(merged_content)
 
-def split_and_save(dataset, prefix):
-    train = dataset.iloc[:10000]
-    val = dataset.iloc[10000:11000]
-    test = dataset.iloc[11000:12000]
-    os.makedirs(os.path.dirname(f"./wikipedia_resized/"), exist_ok=True)
-    train.to_csv(f'{prefix}_train.csv', index=False)
-    val.to_csv(f'{prefix}_val.csv', index=False)
-    test.to_csv(f'{prefix}_test.csv', index=False)
-    return f"{prefix}_train.csv", f"{prefix}_val.csv", f"{prefix}_test.csv"
 
-def export_to_txt(dataset, filename):
-    with open(filename, 'w') as f:
-        for row in dataset['text'][:len(dataset) // DIV]:
-            f.write(row)
+dataset = datasets.load_dataset("wikipedia", "20220301.simple")
+# save the dataset to csv
+# FULL ENGLISH DATASET
+dataset = dataset['train']
+dataset = dataset.select(range(12000))
+dataset = dataset.to_pandas()
 
-datasets_list = [
-    ("20220301.simple", "wiki_eng", 12000),
-    ("20220301.it", "wiki_ita", 2000),
-    ("20220301.frr", "wiki_frr", 2000),
-    ("20220301.de", "wiki_de", 2000)
-]
 
-csv_files = []
+# divide the dataset into 3 parts
+train = dataset.iloc[:10000]
+val = dataset.iloc[10000:11000]
+test = dataset.iloc[11000:12000]
+os.makedirs(os.path.dirname("./wikipedia_resized/"), exist_ok=True)
+train.to_csv('wiki_eng_train.csv', index=False)
+val.to_csv('wiki_eng_val.csv', index=False)
+test.to_csv('wiki_eng_test.csv', index=False)
+# LITTLE ENGLISH DATASET
+little_train = dataset.iloc[:3500]
+little_train.to_csv('wikil_eng_train.csv', index=False)
 
-for dataset_name, prefix, size in datasets_list:
-    dataset = datasets.load_dataset("wikipedia", dataset_name)['train']
-    dataset = dataset.select(range(size)).to_pandas()
-    csv_files.extend(split_and_save(dataset, f'./wikipedia_resized/{prefix}'))
 
-for file_ in csv_files:
-    dataset = pd.read_csv(file_)
-    export_to_txt(dataset, f"{file_.split('.')[0]}.txt")
 
-merge_and_shuffle([f'{prefix}.txt' for prefix in csv_files if 'train' in prefix], './wikipedia_resized/wikil_eng_wiki_ita_train.txt')
-merge_and_shuffle([f'{prefix}.txt' for prefix in csv_files if 'val' in prefix], './wikipedia_resized/wikil_eng_wiki_ita_val.txt')
-merge_and_shuffle([f'{prefix}.txt' for prefix in csv_files if 'test' in prefix], './wikipedia_resized/wikil_eng_wiki_ita_test.txt')
+# LITTLE ITALIAN DATASET
+dataset = datasets.load_dataset("wikipedia", "20220301.it")
+dataset = dataset['train']
+dataset = dataset.select(range(2000))
+dataset = dataset.to_pandas()
+train = dataset.iloc[:1300]
+val = dataset.iloc[1300:1600]
+test = dataset.iloc[1600:2000]
+train.to_csv('wiki_ita_train.csv', index=False)
+val.to_csv('wiki_ita_val.csv', index=False)
+test.to_csv('wiki_ita_test.csv', index=False)
 
-# Clean folder
-for f in csv_files:
-    os.remove(f)
-for f in os.listdir('.'):
-    if f.endswith('.txt'):
-        os.remove(f)
+
+# LITTLE ITALIAN DATASET
+dataset = datasets.load_dataset("wikipedia", "20220301.fr")
+dataset = dataset['train']
+dataset = dataset.select(range(2000))
+dataset = dataset.to_pandas()
+train = dataset.iloc[:1300]
+val = dataset.iloc[1300:1600]
+test = dataset.iloc[1600:2000]
+train.to_csv('wiki_fr_train.csv', index=False)
+val.to_csv('wiki_fr_val.csv', index=False)
+test.to_csv('wiki_fr_test.csv', index=False)
+
+
+
+# LITTLE ENGLISH AND ITALIAN DATASET AGAIN
+files = ["wiki_eng_train.csv", "wiki_eng_val.csv", "wiki_eng_test.csv", "wikil_eng_train.csv",
+         "wiki_ita_train.csv", "wiki_ita_val.csv", "wiki_ita_test.csv",
+         "wiki_fr_train.csv", "wiki_fr_val.csv", "wiki_fr_test.csv"
+        ]
+
+
+for file_ in files:
+  dataset = pd.read_csv(file_)
+  path = f"{file_.split('/')[-1].split('.')[0]}.txt"
+  #export DataFrame to text file
+  with open(path, 'w') as f:
+      for row in dataset['text'][:len(dataset)//DIV]:
+        f.write(row)
+
+# MERGE AND SHUFFLE
+file1_path = 'wikil_eng_train.txt'
+file2_path = 'wiki_ita_train.txt'
+file3_path = 'wiki_fr_train.txt'
+output_file_path = './wikipedia_resized/wikil_eng_fr_ita_train.txt'
+merge_and_shuffle(file1_path, file2_path, file3_path, output_file_path)
+
+
+file1_path = 'wiki_eng_val.txt'
+file2_path = 'wiki_ita_val.txt'
+file3_path = 'wiki_fr_val.txt'
+output_file_path = './wikipedia_resized/wikil_eng_fr_ita_val.txt'
+merge_and_shuffle(file1_path, file2_path, file3_path, output_file_path)
+
+file1_path = 'wiki_eng_test.txt'
+file2_path = 'wiki_ita_test.txt'
+file3_path = 'wiki_fr_test.txt'
+output_file_path = './wikipedia_resized/wikil_eng_fr_ita_test.txt'
+merge_and_shuffle(file1_path, file2_path, file3_path, output_file_path)
+os.replace("wiki_eng_train.txt", "./wikipedia_resized/wiki_eng_train.txt")
+os.replace("wiki_eng_val.txt", "./wikipedia_resized/wiki_eng_val.txt")
+os.replace("wiki_eng_test.txt", "./wikipedia_resized/wiki_eng_test.txt")
+
+# clean folder
+files = ["wiki_eng_train.csv", "wiki_eng_val.csv", "wiki_eng_test.csv", "wikil_eng_train.csv", "wikil_eng_train.txt",
+         "wiki_ita_train.csv", "wiki_ita_val.csv", "wiki_ita_test.csv",
+         "wiki_ita_train.txt", "wiki_ita_val.txt", "wiki_ita_test.txt",
+
+          "wiki_fr_train.csv", "wiki_fr_val.csv", "wiki_fr_test.csv",
+         "wiki_fr_train.txt", "wiki_fr_val.txt", "wiki_fr_test.txt",
+         ]
+for f in files:
+  os.remove(f)
